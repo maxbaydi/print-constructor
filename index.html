@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор печатей Pro v3.0 (Ultra Realistic)</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans:400,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <svg id="svg-filters">
+        <defs>
+            <filter id="stamp-distort" x="-20%" y="-20%" width="140%" height="140%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" result="noise" seed="5"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
+            </filter>
+            <filter id="distressed-stamp" x="-30%" y="-30%" width="160%" height="160%">
+                <feTurbulence type="turbulence" baseFrequency="0.05" numOctaves="3" result="noise" seed="7"/>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="8" xChannelSelector="R" yChannelSelector="G" result="displaced"/>
+                <feColorMatrix type="saturate" values="0.8" in="displaced" result="desaturated"/>
+                <feGaussianBlur stdDeviation="0.5" in="desaturated" result="blurred"/>
+                <feComposite operator="over" in="blurred" in2="SourceGraphic"/>
+            </filter>
+            <filter id="grunge-texture" x="-50%" y="-50%" width="200%" height="200%">
+                <feTurbulence type="fractalNoise" baseFrequency="0.08" numOctaves="4" result="turbulence" seed="3"/>
+                <feColorMatrix type="saturate" values="0" in="turbulence" result="grayscale"/>
+                <feComponentTransfer in="grayscale" result="contrast">
+                    <feFuncA type="discrete" tableValues="0 0.3 0.5 0.7 1"/>
+                </feComponentTransfer>
+            </filter>
+            <filter id="ink-bleed" x="-10%" y="-10%" width="120%" height="120%">
+                <feGaussianBlur stdDeviation="1" result="blur"/>
+                <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.8 0" in="blur"/>
+            </filter>
+        </defs>
+    </svg>
+
+    <div class="container">
+        <header>
+            <h1>Генератор печатей Pro</h1>
+        </header>
+        
+        <div class="content">
+            <div class="controls">
+                
+                <details open>
+                    <summary>Текст печати</summary>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>Верхний текст</label>
+                            <input type="text" id="topText" value="西安施泰尔宝电气股份有限公司">
+                        </div>
+                        <div class="input-group">
+                            <label>Нижний текст</label>
+                            <input type="text" id="bottomText" value="916101333165776166K">
+                        </div>
+                    </div>
+                </details>
+
+                <details open>
+                    <summary>Реалистичное состаривание</summary>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>Текстура бумаги</label>
+                            <div class="range-wrap">
+                                <input type="range" id="paperTextureVisibility" min="0" max="100" value="10">
+                                <span id="paperTextureVisibilityValue" class="value-display">10%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Общий износ</label>
+                            <div class="range-wrap">
+                                <input type="range" id="wearLevel" min="0" max="100" value="10">
+                                <span id="wearLevelValue" class="value-display">10%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Деформация</label>
+                            <div class="range-wrap">
+                                <input type="range" id="wobbleLevel" min="0" max="100" value="80">
+                                <span id="wobbleLevelValue" class="value-display">80%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Растекание чернил</label>
+                            <div class="range-wrap">
+                                <input type="range" id="blurLevel" min="0" max="30" value="0">
+                                <span id="blurLevelValue" class="value-display">0.0px</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Насыщенность чернил</label>
+                            <div class="range-wrap">
+                                <input type="range" id="inkOpacity" min="50" max="100" value="96">
+                                <span id="inkOpacityValue" class="value-display">96%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Цвет чернил</label>
+                            <input type="color" id="stampColor" class="color-picker" value="#cf3030">
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Верхний текст</summary>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>Шрифт</label>
+                            <select id="topFontFamily">
+                                <option value="Arial">Arial</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                                <option value="SimSun">SimSun (китайский)</option>
+                                <option value="Noto Sans SC" selected>Noto Sans SC</option>
+                                <option value="Courier New">Courier New</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Размер</label>
+                            <div class="range-wrap">
+                                <input type="range" id="topFontSize" min="10" max="100" value="32">
+                                <span id="topFontSizeValue" class="value-display">32px</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Разрядка</label>
+                            <div class="range-wrap">
+                                <input type="range" id="topLetterSpacing" min="0" max="3" step="0.05" value="0.7">
+                                <span id="topLetterSpacingValue" class="value-display">0.7</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Радиус</label>
+                            <div class="range-wrap">
+                                <input type="range" id="topTextRadius" min="40" max="95" value="84">
+                                <span id="topTextRadiusValue" class="value-display">84%</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Нижний текст</summary>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>Шрифт</label>
+                            <select id="bottomFontFamily">
+                                <option value="Arial">Arial</option>
+                                <option value="Noto Sans SC" selected>Noto Sans SC</option>
+                                <option value="Times New Roman">Times New Roman</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Размер</label>
+                            <div class="range-wrap">
+                                <input type="range" id="bottomFontSize" min="10" max="100" value="28">
+                                <span id="bottomFontSizeValue" class="value-display">28px</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Разрядка</label>
+                            <div class="range-wrap">
+                                <input type="range" id="bottomLetterSpacing" min="0" max="3" step="0.05" value="0.6">
+                                <span id="bottomLetterSpacingValue" class="value-display">0.6</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Радиус</label>
+                            <div class="range-wrap">
+                                <input type="range" id="bottomTextRadius" min="40" max="95" value="82">
+                                <span id="bottomTextRadiusValue" class="value-display">82%</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <details>
+                    <summary>Геометрия</summary>
+                    <div class="section-content">
+                        <div class="input-group">
+                            <label>Размер звезды</label>
+                            <div class="range-wrap">
+                                <input type="range" id="starSize" min="0" max="150" value="80">
+                                <span id="starSizeValue" class="value-display">80px</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Толщина обода</label>
+                            <div class="range-wrap">
+                                <input type="range" id="circleWidth" min="1" max="30" value="8">
+                                <span id="circleWidthValue" class="value-display">8px</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Размер печати (px)</label>
+                            <div class="range-wrap">
+                                <input type="range" id="stampSize" min="200" max="800" value="400">
+                                <span id="stampSizeValue" class="value-display">400px</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="action-bar">
+                    <div class="input-group">
+                        <label>Разрешение экспорта</label>
+                        <select id="exportResolution">
+                            <option value="1">1x (Базовый размер)</option>
+                            <option value="2" selected>2x (Двойной размер)</option>
+                            <option value="4">4x (Четверной размер)</option>
+                        </select>
+                    </div>
+                    <button id="downloadBtn">Скачать PNG</button>
+                    <button id="resetBtn" class="reset-btn">Сброс</button>
+                </div>
+            </div>
+            
+            <div class="preview">
+                <div class="stamp-wrapper">
+                    <canvas id="stampCanvas" width="400" height="400"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="scripts.js"></script>
+</body>
+</html>
+
