@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Генератор печатей Pro v3.0 (Ultra Realistic)</title>
+    <title>Генератор печатей Pro v4.0 — Статический генератор с состариванием</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+SC:400,700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Noto+Serif+SC:400,700&display=swap" rel="stylesheet">
@@ -41,15 +41,23 @@
 
     <div class="container">
         <header>
-            <h1>Генератор печатей Pro</h1>
+            <div>
+                <p class="eyebrow">Статический генератор печатей • Готов к загрузке на обычный хостинг</p>
+                <h1>Генератор печатей Pro v4.0</h1>
+                <p class="subtitle">Генерируйте реалистичные печати с эффектами состаривания и текстурными наложениями без серверной части.</p>
+            </div>
+            <div class="header-actions">
+                <button id="resetBtn" class="reset-btn ghost">Сброс</button>
+                <button id="downloadBtn" class="primary">Скачать PNG</button>
+            </div>
         </header>
-        
+
         <div class="content">
             <div class="controls">
-                
+
                 <details open>
                     <summary>Текст печати</summary>
-                    <div class="section-content">
+                    <div class="section-content grid-2">
                         <div class="input-group">
                             <label>Верхний текст</label>
                             <input type="text" id="topText" value="西安施泰尔宝电气股份有限公司">
@@ -79,17 +87,10 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Деформация</label>
-                            <div class="range-wrap">
-                                <input type="range" id="wobbleLevel" min="0" max="100" value="80">
-                                <span id="wobbleLevelValue" class="value-display">80%</span>
-                            </div>
-                        </div>
-                        <div class="input-group">
                             <label>Растекание чернил</label>
                             <div class="range-wrap">
-                                <input type="range" id="blurLevel" min="0" max="30" value="0">
-                                <span id="blurLevelValue" class="value-display">0.0px</span>
+                                <input type="range" id="blurLevel" min="0" max="30" value="2">
+                                <span id="blurLevelValue" class="value-display">0.2px</span>
                             </div>
                         </div>
                         <div class="input-group">
@@ -100,15 +101,40 @@
                             </div>
                         </div>
                         <div class="input-group">
-                            <label>Цвет чернил</label>
-                            <input type="color" id="stampColor" class="color-picker" value="#cf3030">
+                            <label>Текстура состаривания</label>
+                            <select id="agingTexture">
+                                <option value="paper">Бумага с волокнами</option>
+                                <option value="linen">Льняная ткань</option>
+                                <option value="dust">Пыль и кракелюр</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Сила текстуры</label>
+                            <div class="range-wrap">
+                                <input type="range" id="agingIntensity" min="0" max="100" value="40">
+                                <span id="agingIntensityValue" class="value-display">40%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Масштаб текстуры</label>
+                            <div class="range-wrap">
+                                <input type="range" id="agingScale" min="50" max="200" value="110">
+                                <span id="agingScaleValue" class="value-display">110%</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Виньетка износа</label>
+                            <div class="range-wrap">
+                                <input type="range" id="vignetteIntensity" min="0" max="100" value="25">
+                                <span id="vignetteIntensityValue" class="value-display">25%</span>
+                            </div>
                         </div>
                     </div>
                 </details>
 
-                <details>
+                <details open>
                     <summary>Верхний текст</summary>
-                    <div class="section-content">
+                    <div class="section-content grid-2">
                         <div class="input-group">
                             <label>Шрифт</label>
                             <select id="topFontFamily">
@@ -145,7 +171,7 @@
 
                 <details>
                     <summary>Нижний текст</summary>
-                    <div class="section-content">
+                    <div class="section-content grid-2">
                         <div class="input-group">
                             <label>Шрифт</label>
                             <select id="bottomFontFamily">
@@ -180,7 +206,7 @@
 
                 <details>
                     <summary>Геометрия</summary>
-                    <div class="section-content">
+                    <div class="section-content grid-2">
                         <div class="input-group">
                             <label>Размер звезды</label>
                             <div class="range-wrap">
@@ -202,32 +228,46 @@
                                 <span id="stampSizeValue" class="value-display">400px</span>
                             </div>
                         </div>
+                        <div class="input-group">
+                            <label>Деформация</label>
+                            <div class="range-wrap">
+                                <input type="range" id="wobbleLevel" min="0" max="100" value="80">
+                                <span id="wobbleLevelValue" class="value-display">80%</span>
+                            </div>
+                        </div>
                     </div>
                 </details>
 
-                <div class="action-bar">
-                    <div class="input-group">
-                        <label>Разрешение экспорта</label>
-                        <select id="exportResolution">
-                            <option value="1">1x (Базовый размер)</option>
-                            <option value="2" selected>2x (Двойной размер)</option>
-                            <option value="4">4x (Четверной размер)</option>
-                        </select>
+                <details>
+                    <summary>Экспорт</summary>
+                    <div class="section-content grid-2">
+                        <div class="input-group">
+                            <label>Разрешение экспорта</label>
+                            <select id="exportResolution">
+                                <option value="1">1x (Базовый размер)</option>
+                                <option value="2" selected>2x (Двойной размер)</option>
+                                <option value="4">4x (Четверной размер)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Цвет чернил</label>
+                            <input type="color" id="stampColor" class="color-picker" value="#cf3030">
+                        </div>
                     </div>
-                    <button id="downloadBtn">Скачать PNG</button>
-                    <button id="resetBtn" class="reset-btn">Сброс</button>
-                </div>
+                </details>
             </div>
-            
+
             <div class="preview">
                 <div class="stamp-wrapper">
                     <canvas id="stampCanvas" width="400" height="400"></canvas>
                 </div>
+                <div class="helper-text">
+                    Колесо мыши — масштаб, зажатая левая кнопка — перемещение. Все работает офлайн без серверов.
+                </div>
             </div>
         </div>
     </div>
-    
+
     <script src="scripts.js"></script>
 </body>
 </html>
-
