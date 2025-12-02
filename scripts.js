@@ -94,6 +94,9 @@ class StampGenerator {
             agingTexture: null
         };
 
+        this.backgroundImage = null;
+        this.loadBackgroundImage();
+
         this.inputs = {
             topText: document.getElementById('topText'),
             bottomText: document.getElementById('bottomText'),
@@ -156,6 +159,18 @@ class StampGenerator {
         this.loadSettings();
         this.initEventListeners();
         this.requestRender();
+    }
+
+    loadBackgroundImage() {
+        const img = new Image();
+        img.onload = () => {
+            this.backgroundImage = img;
+            this.requestRender();
+        };
+        img.onerror = () => {
+            console.error('Не удалось загрузить фоновое изображение');
+        };
+        img.src = 'o3iZzaY.jpeg';
     }
 
     defaultSettings() {
@@ -334,8 +349,12 @@ class StampGenerator {
         return (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value;
     }
 
-    getNoiseMap(width, height) {
-        const cacheKey = `${width}x${height}`;
+    getNoiseMap(width, height, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `${width}x${height}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.noiseMap && this.textures.noiseMap.key === cacheKey) {
             return this.textures.noiseMap.canvas;
         }
@@ -351,7 +370,9 @@ class StampGenerator {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
-                const noise = this.simplex.octaveNoise(x * scale, y * scale, 3, 0.6, 0.5);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise = this.simplex.octaveNoise(nx * scale, ny * scale, 3, 0.6, 0.5);
                 const val = Math.floor((noise + 1) * 0.5 * 255);
                 data[idx] = val;
                 data[idx + 1] = val;
@@ -372,8 +393,12 @@ class StampGenerator {
         return finalCanvas;
     }
 
-    getPaperTexture(width, height) {
-        const cacheKey = `paper_${width}x${height}`;
+    getPaperTexture(width, height, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `paper_${width}x${height}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.paperTexture && this.textures.paperTexture.key === cacheKey) {
             return this.textures.paperTexture.canvas;
         }
@@ -390,8 +415,10 @@ class StampGenerator {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
-                const noise1 = this.simplexPaper.octaveNoise(x * scale1, y * scale1, 2, 0.5, 1.0);
-                const noise2 = this.simplexPaper.octaveNoise(x * scale2, y * scale2, 3, 0.7, 0.3);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise1 = this.simplexPaper.octaveNoise(nx * scale1, ny * scale1, 2, 0.5, 1.0);
+                const noise2 = this.simplexPaper.octaveNoise(nx * scale2, ny * scale2, 3, 0.7, 0.3);
                 const combined = (noise1 * 0.6 + noise2 * 0.4 + 1) * 0.5;
                 const val = Math.floor(combined * 255);
                 data[idx] = val;
@@ -406,8 +433,12 @@ class StampGenerator {
         return canvas;
     }
 
-    getWearMap(width, height, intensity) {
-        const cacheKey = `wear_${width}x${height}_${intensity}`;
+    getWearMap(width, height, intensity, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `wear_${width}x${height}_${intensity}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.wearMap && this.textures.wearMap.key === cacheKey) {
             return this.textures.wearMap.canvas;
         }
@@ -432,8 +463,10 @@ class StampGenerator {
                 const dy = y - cy;
                 const dist = Math.sqrt(dx * dx + dy * dy) / maxDist;
 
-                const noise1 = this.simplexWear.octaveNoise(x * scale1, y * scale1, 4, 0.6, 0.5);
-                const noise2 = this.simplexWear.octaveNoise(x * scale2, y * scale2, 2, 0.5, 1.2);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise1 = this.simplexWear.octaveNoise(nx * scale1, ny * scale1, 4, 0.6, 0.5);
+                const noise2 = this.simplexWear.octaveNoise(nx * scale2, ny * scale2, 2, 0.5, 1.2);
                 const combined = (noise1 * 0.7 + noise2 * 0.3 + 1) * 0.5;
 
                 const edgeFactor = Math.max(0, 1 - dist * 1.2);
@@ -460,8 +493,12 @@ class StampGenerator {
         return finalCanvas;
     }
 
-    getVariationMap(width, height) {
-        const cacheKey = `${width}x${height}`;
+    getVariationMap(width, height, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `${width}x${height}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.variationMap && this.textures.variationMap.key === cacheKey) {
             return this.textures.variationMap.canvas;
         }
@@ -477,7 +514,9 @@ class StampGenerator {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
-                const noise = this.simplex.octaveNoise(x * scale, y * scale, 3, 0.65, 0.8);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise = this.simplex.octaveNoise(nx * scale, ny * scale, 3, 0.65, 0.8);
                 const val = Math.floor((noise + 1) * 0.5 * 255);
                 data[idx] = val;
                 data[idx + 1] = val;
@@ -498,9 +537,13 @@ class StampGenerator {
         return finalCanvas;
     }
 
-    getAgingTexture(type, width, height, scalePercent) {
+    getAgingTexture(type, width, height, scalePercent, baseWidth = null, baseHeight = null) {
         const scale = scalePercent / 100;
-        const cacheKey = `${type}_${width}x${height}_${scale.toFixed(2)}`;
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `${type}_${width}x${height}_${scale.toFixed(2)}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.agingTexture && this.textures.agingTexture.key === cacheKey) {
             return this.textures.agingTexture.canvas;
         }
@@ -527,8 +570,10 @@ class StampGenerator {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
-                const n1 = this.simplexAging.octaveNoise(x * settings.scale1 * scale, y * settings.scale1 * scale, settings.octaves, settings.persistence, 0.8);
-                const n2 = this.simplexAging.octaveNoise(x * settings.scale2 * scale, y * settings.scale2 * scale, settings.octaves + 1, settings.persistence - 0.1, 1.2);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const n1 = this.simplexAging.octaveNoise(nx * settings.scale1 * scale, ny * settings.scale1 * scale, settings.octaves, settings.persistence, 0.8);
+                const n2 = this.simplexAging.octaveNoise(nx * settings.scale2 * scale, ny * settings.scale2 * scale, settings.octaves + 1, settings.persistence - 0.1, 1.2);
                 const val = Math.floor(((n1 * 0.6 + n2 * 0.4) + 1) * 0.5 * 255);
                 data[idx] = val;
                 data[idx + 1] = val;
@@ -553,8 +598,9 @@ class StampGenerator {
         this.renderToContext(this.ctx, size, 1);
     }
 
-    renderToContext(ctx, size, scale) {
-        const options = this.collectOptions(scale, size);
+    renderToContext(ctx, size, scale, baseSize = null) {
+        const textureBaseSize = baseSize || size; // Для текстур используем базовый размер
+        const options = this.collectOptions(scale, size, textureBaseSize);
         ctx.clearRect(0, 0, size, size);
 
         const baseCanvas = document.createElement('canvas');
@@ -562,18 +608,31 @@ class StampGenerator {
         baseCanvas.height = size;
         const baseCtx = baseCanvas.getContext('2d');
 
+        // Сохраняем маску ДО эффектов
         this.configureFilters(options);
         this.drawStampBase(baseCtx, options);
+
+        const stampMask = document.createElement('canvas');
+        stampMask.width = size;
+        stampMask.height = size;
+        stampMask.getContext('2d').drawImage(baseCanvas, 0, 0);
+
         this.applyInkVariation(baseCtx, options);
         this.applyAgingAndWear(baseCtx, options);
+
+        // Финальная обрезка
+        baseCtx.globalCompositeOperation = 'destination-in';
+        baseCtx.drawImage(stampMask, 0, 0);
+        baseCtx.globalCompositeOperation = 'source-over';
 
         ctx.drawImage(baseCanvas, 0, 0);
     }
 
-    collectOptions(scale, size) {
+    collectOptions(scale, size, textureBaseSize = null) {
         return {
             size,
             scale,
+            textureBaseSize: textureBaseSize || size, // ДОБАВЬ ЭТО
             cx: size / 2,
             cy: size / 2,
             mainColor: this.val('color'),
@@ -667,7 +726,7 @@ class StampGenerator {
         ctx.save();
         ctx.globalCompositeOperation = 'multiply';
         ctx.globalAlpha = Math.min(0.35, opt.inkVariation + 0.08);
-        const noise = this.getNoiseMap(opt.size, opt.size);
+        const noise = this.getNoiseMap(opt.size, opt.size, opt.textureBaseSize, opt.textureBaseSize);
         ctx.drawImage(noise, 0, 0);
         ctx.restore();
 
@@ -683,25 +742,78 @@ class StampGenerator {
         }
     }
 
+    applyTextureToStampOnly(ctx, textureFunction) {
+        const size = ctx.canvas.width;
+
+        // 1. Создаём бинарную маску (только полностью непрозрачные пиксели)
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = size;
+        maskCanvas.height = size;
+        const maskCtx = maskCanvas.getContext('2d');
+
+        // Копируем оригинал
+        maskCtx.drawImage(ctx.canvas, 0, 0);
+
+        // Усиливаем контраст альфа-канала для чёткой маски
+        const maskData = maskCtx.getImageData(0, 0, size, size);
+        const threshold = 15; // Порог отсечения
+        for (let i = 3; i < maskData.data.length; i += 4) {
+            maskData.data[i] = maskData.data[i] > threshold ? 255 : 0;
+        }
+        maskCtx.putImageData(maskData, 0, 0);
+
+        // 2. Применяем текстуру на временном canvas
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = size;
+        tempCanvas.height = size;
+        const tempCtx = tempCanvas.getContext('2d');
+
+        // Сначала рисуем оригинальную печать
+        tempCtx.drawImage(ctx.canvas, 0, 0);
+
+        // Применяем текстурную функцию
+        textureFunction(tempCtx);
+
+        // 3. КРИТИЧНО: обрезаем по бинарной маске
+        tempCtx.globalCompositeOperation = 'destination-in';
+        tempCtx.drawImage(maskCanvas, 0, 0);
+        tempCtx.globalCompositeOperation = 'source-over';
+
+        // 4. Очищаем и рисуем результат
+        ctx.clearRect(0, 0, size, size);
+        ctx.drawImage(tempCanvas, 0, 0);
+    }
+
     applyAgingAndWear(ctx, opt) {
+        const size = ctx.canvas.width;
+
+        // Сохраняем чистую маску печати В САМОМ НАЧАЛЕ
+        const originalMask = document.createElement('canvas');
+        originalMask.width = size;
+        originalMask.height = size;
+        const maskCtx = originalMask.getContext('2d');
+        maskCtx.drawImage(ctx.canvas, 0, 0);
+
         const wearIntensity = opt.wearLevel;
 
         if (opt.paperTextureVisibility > 0) {
-            const paper = this.getPaperTexture(opt.size, opt.size);
-            ctx.save();
-            ctx.globalAlpha = opt.paperTextureVisibility * 0.6;
-            ctx.globalCompositeOperation = 'overlay';
-            ctx.drawImage(paper, 0, 0);
-            ctx.restore();
+            this.applyTextureToStampOnly(ctx, (textureCtx) => {
+                const paper = this.getPaperTexture(opt.size, opt.size, opt.textureBaseSize, opt.textureBaseSize);
+                textureCtx.save();
+                textureCtx.globalAlpha = opt.paperTextureVisibility * 0.6;
+                textureCtx.globalCompositeOperation = 'overlay';
+                textureCtx.drawImage(paper, 0, 0);
+                textureCtx.restore();
+            });
         }
 
         if (wearIntensity > 0) {
-            const wearMap = this.getWearMap(opt.size, opt.size, wearIntensity);
+            const wearMap = this.getWearMap(opt.size, opt.size, wearIntensity, opt.textureBaseSize, opt.textureBaseSize);
             this.applyTextureMask(ctx, wearMap, wearIntensity * 0.8);
 
             const noiseIntensity = Math.min(0.45, wearIntensity + opt.inkVariation);
             if (noiseIntensity > 0.05) {
-                const noiseCanvas = this.getHighFreqNoise(opt.size, opt.size, noiseIntensity);
+                const noiseCanvas = this.getHighFreqNoise(opt.size, opt.size, noiseIntensity, opt.textureBaseSize, opt.textureBaseSize);
                 ctx.save();
                 ctx.globalCompositeOperation = 'destination-out';
                 ctx.globalAlpha = 0.2 + (noiseIntensity * 0.5);
@@ -709,21 +821,43 @@ class StampGenerator {
                 ctx.restore();
             }
 
-            const grungeMask = this.getGrungeMask(opt.size, opt.size, wearIntensity);
+            const grungeMask = this.getGrungeMask(opt.size, opt.size, wearIntensity, opt.textureBaseSize, opt.textureBaseSize);
             this.applyTextureMask(ctx, grungeMask, wearIntensity * 0.6);
         }
 
         if (opt.agingIntensity > 0) {
-            const agingTexture = this.getAgingTexture(opt.agingTexture, opt.size, opt.size, opt.agingScale);
-            ctx.save();
-            ctx.globalAlpha = opt.agingIntensity;
-            ctx.globalCompositeOperation = 'multiply';
-            ctx.drawImage(agingTexture, 0, 0);
-            ctx.restore();
+            const agingTexture = this.getAgingTexture(opt.agingTexture, size, size, opt.agingScale, opt.textureBaseSize, opt.textureBaseSize);
+
+            // Сохраняем текущее состояние печати
+            const stampImageData = ctx.getImageData(0, 0, size, size);
+            const stampData = stampImageData.data;
+
+            // Получаем данные текстуры
+            const tempCtx = document.createElement('canvas').getContext('2d');
+            tempCtx.canvas.width = size;
+            tempCtx.canvas.height = size;
+            tempCtx.drawImage(agingTexture, 0, 0);
+            const textureData = tempCtx.getImageData(0, 0, size, size).data;
+
+            // Применяем multiply только к непрозрачным пикселям
+            for (let i = 0; i < stampData.length; i += 4) {
+                if (stampData[i + 3] > 0) { // Только если пиксель непрозрачный
+                    const factor = textureData[i] / 255; // Grayscale value
+                    const blend = 1 - (1 - factor) * opt.agingIntensity;
+                    stampData[i] = Math.round(stampData[i] * blend);
+                    stampData[i + 1] = Math.round(stampData[i + 1] * blend);
+                    stampData[i + 2] = Math.round(stampData[i + 2] * blend);
+                    // Alpha остаётся без изменений
+                }
+            }
+
+            ctx.putImageData(stampImageData, 0, 0);
         }
 
         if (opt.vignetteIntensity > 0) {
-            this.applyVignette(ctx, opt.vignetteIntensity);
+            this.applyTextureToStampOnly(ctx, (textureCtx) => {
+                this.applyVignette(textureCtx, opt.vignetteIntensity);
+            });
         }
 
         if (opt.wobbleLevel > 0.1) {
@@ -732,6 +866,11 @@ class StampGenerator {
                 this.applyDistressedFilter(ctx, distressedIntensity);
             }
         }
+
+        // В САМОМ КОНЦЕ — финальная обрезка по оригинальной маске
+        ctx.globalCompositeOperation = 'destination-in';
+        ctx.drawImage(originalMask, 0, 0);
+        ctx.globalCompositeOperation = 'source-over';
     }
 
     applyVignette(ctx, intensity) {
@@ -752,7 +891,11 @@ class StampGenerator {
         ctx.restore();
     }
 
-    getHighFreqNoise(width, height, intensity) {
+    getHighFreqNoise(width, height, intensity, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
@@ -764,7 +907,9 @@ class StampGenerator {
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
-                const noise = this.simplex.noise(x * scale, y * scale);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise = this.simplex.noise(nx * scale, ny * scale);
                 const threshold = 0.3;
                 if (noise > threshold) {
                     const alpha = ((noise - threshold) / (1 - threshold)) * intensity * 255;
@@ -778,8 +923,12 @@ class StampGenerator {
         return canvas;
     }
 
-    getGrungeMask(width, height, intensity) {
-        const cacheKey = `grunge_${width}x${height}_${intensity}`;
+    getGrungeMask(width, height, intensity, baseWidth = null, baseHeight = null) {
+        const noiseWidth = baseWidth || width;
+        const noiseHeight = baseHeight || height;
+        const scaleFactorX = width / noiseWidth;
+        const scaleFactorY = height / noiseHeight;
+        const cacheKey = `grunge_${width}x${height}_${intensity}_${noiseWidth}x${noiseHeight}`;
         if (this.textures.grungeMask && this.textures.grungeMask.key === cacheKey) {
             return this.textures.grungeMask.canvas;
         }
@@ -804,9 +953,11 @@ class StampGenerator {
             for (let x = 0; x < width; x++) {
                 const idx = (y * width + x) * 4;
 
-                const noise1 = this.simplexWear.octaveNoise(x * scale1, y * scale1, 3, 0.6, 0.5);
-                const noise2 = this.simplexWear.octaveNoise(x * scale2, y * scale2, 2, 0.5, 1.0);
-                const noise3 = this.simplexWear.noise(x * scale3, y * scale3);
+                const nx = x / scaleFactorX;
+                const ny = y / scaleFactorY;
+                const noise1 = this.simplexWear.octaveNoise(nx * scale1, ny * scale1, 3, 0.6, 0.5);
+                const noise2 = this.simplexWear.octaveNoise(nx * scale2, ny * scale2, 2, 0.5, 1.0);
+                const noise3 = this.simplexWear.noise(nx * scale3, ny * scale3);
 
                 const combined = (noise1 * 0.5 + noise2 * 0.3 + noise3 * 0.2 + 1) * 0.5;
                 const threshold = 0.4 + (intensity * 0.3);
@@ -994,6 +1145,7 @@ class StampGenerator {
         exportCanvas.height = exportSize;
         const exportCtx = exportCanvas.getContext('2d');
 
+        // Сбрасываем кэш текстур
         this.textures.noiseMap = null;
         this.textures.variationMap = null;
         this.textures.paperTexture = null;
@@ -1001,14 +1153,19 @@ class StampGenerator {
         this.textures.grungeMask = null;
         this.textures.agingTexture = null;
 
-        this.renderToContext(exportCtx, exportSize, resolution);
+        // ВАЖНО: передаём baseSize для генерации текстур
+        this.renderToContext(exportCtx, exportSize, resolution, baseSize);
 
+        // Сбрасываем кэш и обновляем превью
         this.textures.noiseMap = null;
         this.textures.variationMap = null;
         this.textures.paperTexture = null;
         this.textures.wearMap = null;
         this.textures.grungeMask = null;
         this.textures.agingTexture = null;
+
+        // ДОБАВЬ ЭТО - обновление превью после экспорта
+        this.requestRender();
 
         const link = document.createElement('a');
         const timestamp = new Date().toISOString().slice(0, 19).replace(/[:.]/g, '-');

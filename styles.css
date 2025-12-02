@@ -17,7 +17,7 @@
 
 body {
     font-family: 'Segoe UI', 'Roboto', sans-serif;
-    background: radial-gradient(circle at 20% 20%, #191b20, #0d0e10 45%), #0d0e10;
+    background-color: #f0f0f0;
     min-height: 100vh;
     padding: 28px;
     color: var(--text);
@@ -90,7 +90,10 @@ h1 {
 
 .preview {
     flex: 1;
-    background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.04), rgba(0,0,0,0.05)), #111218;
+    background-image: url('o3iZzaY.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -282,13 +285,17 @@ button.ghost:hover { border-color: #4b80ff; color: #fff; }
     transform-origin: center center;
     cursor: grab;
     transition: cursor 0.1s;
-    background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.04), rgba(0,0,0,0.1));
-    border-radius: 16px;
-    border: 1px solid var(--border);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+    background: transparent;
 }
 
 .stamp-wrapper:active { cursor: grabbing; }
+
+.print-canvas-area {
+    background-image: url('o3iZzaY.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
 
 #svg-filters {
     position: absolute;
