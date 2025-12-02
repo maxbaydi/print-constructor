@@ -72,7 +72,15 @@ class SimplexNoise {
 class StampGenerator {
     constructor() {
         this.canvas = document.getElementById('stampCanvas');
+        if (!this.canvas) {
+            console.error('Canvas элемент не найден!');
+            return;
+        }
         this.ctx = this.canvas.getContext('2d');
+        if (!this.ctx) {
+            console.error('Не удалось получить контекст canvas!');
+            return;
+        }
 
         this.distortionMap = document.querySelector('#stamp-distort feDisplacementMap');
         this.turbulence = document.querySelector('#stamp-distort feTurbulence');
@@ -112,16 +120,13 @@ class StampGenerator {
             circleWidth: document.getElementById('circleWidth'),
             stampSize: document.getElementById('stampSize'),
             resolution: document.getElementById('exportResolution'),
-            paperTextureVisibility: document.getElementById('paperTextureVisibility'),
-            wearLevel: document.getElementById('wearLevel'),
             wobbleLevel: document.getElementById('wobbleLevel'),
             blurLevel: document.getElementById('blurLevel'),
             inkOpacity: document.getElementById('inkOpacity'),
             color: document.getElementById('stampColor'),
             agingTexture: document.getElementById('agingTexture'),
             agingIntensity: document.getElementById('agingIntensity'),
-            agingScale: document.getElementById('agingScale'),
-            vignetteIntensity: document.getElementById('vignetteIntensity')
+            agingScale: document.getElementById('agingScale')
         };
 
         this.displays = {
@@ -134,14 +139,11 @@ class StampGenerator {
             starSize: document.getElementById('starSizeValue'),
             circleWidth: document.getElementById('circleWidthValue'),
             stampSize: document.getElementById('stampSizeValue'),
-            paperTextureVisibility: document.getElementById('paperTextureVisibilityValue'),
-            wearLevel: document.getElementById('wearLevelValue'),
             wobbleLevel: document.getElementById('wobbleLevelValue'),
             blurLevel: document.getElementById('blurLevelValue'),
             inkOpacity: document.getElementById('inkOpacityValue'),
             agingIntensity: document.getElementById('agingIntensityValue'),
-            agingScale: document.getElementById('agingScaleValue'),
-            vignetteIntensity: document.getElementById('vignetteIntensityValue')
+            agingScale: document.getElementById('agingScaleValue')
         };
 
         this.downloadBtn = document.getElementById('downloadBtn');
@@ -178,9 +180,6 @@ class StampGenerator {
             blurLevel: 2,
             agingIntensity: 40,
             agingScale: 110,
-            vignetteIntensity: 25,
-            paperTextureVisibility: 10,
-            wearLevel: 10,
             wobbleLevel: 80,
             stampSize: 400
         };
@@ -207,7 +206,7 @@ class StampGenerator {
                     this.displays[key].textContent = this.formatDisplay(key, val);
                 }
 
-                if (['stampSize', 'wearLevel', 'blurLevel', 'agingScale', 'agingIntensity'].includes(key)) {
+                if (['stampSize', 'blurLevel', 'agingScale', 'agingIntensity'].includes(key)) {
                     this.textures.noiseMap = null;
                     this.textures.variationMap = null;
                     this.textures.paperTexture = null;
@@ -346,6 +345,7 @@ class StampGenerator {
 
     val(key) {
         const el = this.inputs[key];
+        if (!el) return null;
         return (el.type === 'range' || el.type === 'number') ? parseFloat(el.value) : el.value;
     }
 
@@ -599,7 +599,7 @@ class StampGenerator {
     }
 
     renderToContext(ctx, size, scale, baseSize = null) {
-        const textureBaseSize = baseSize || size; // Для текстур используем базовый размер
+        const textureBaseSize = size; // Всегда используем размер целевого canvas для текстур
         const options = this.collectOptions(scale, size, textureBaseSize);
         ctx.clearRect(0, 0, size, size);
 
@@ -629,40 +629,47 @@ class StampGenerator {
     }
 
     collectOptions(scale, size, textureBaseSize = null) {
+        const getVal = (key, defaultValue = 0) => {
+            const val = this.val(key);
+            return val !== null && val !== undefined ? val : defaultValue;
+        };
+        
+        const getStringVal = (key, defaultValue = '') => {
+            const val = this.val(key);
+            return val !== null && val !== undefined ? val : defaultValue;
+        };
+
         return {
             size,
             scale,
-            textureBaseSize: textureBaseSize || size, // ДОБАВЬ ЭТО
+            textureBaseSize: textureBaseSize || size,
             cx: size / 2,
             cy: size / 2,
-            mainColor: this.val('color'),
-            blurLevel: this.val('blurLevel'),
-            wobbleLevel: this.val('wobbleLevel') / 100,
-            circleWidth: this.val('circleWidth') * scale,
-            mainRadius: (size / 2) - (10 * scale) - (this.val('circleWidth') * scale / 2),
-            inkOpacity: this.val('inkOpacity') / 100,
-            inkVariation: (this.val('blurLevel') / 30) * 0.5,
-            paperTextureVisibility: this.val('paperTextureVisibility') / 100,
-            wearLevel: this.val('wearLevel') / 100,
+            mainColor: getStringVal('color', '#cf3030'),
+            blurLevel: getVal('blurLevel', 2),
+            wobbleLevel: getVal('wobbleLevel', 80) / 100,
+            circleWidth: getVal('circleWidth', 8) * scale,
+            mainRadius: (size / 2) - (10 * scale) - (getVal('circleWidth', 8) * scale / 2),
+            inkOpacity: getVal('inkOpacity', 96) / 100,
+            inkVariation: (getVal('blurLevel', 2) / 30) * 0.5,
             top: {
-                text: this.val('topText'),
-                font: this.val('topFont'),
-                size: this.val('topSize') * scale,
-                spacing: this.val('topSpacing'),
-                radius: (this.val('topRadius') / 100) * ((size / 2) - 20)
+                text: getStringVal('topText', ''),
+                font: getStringVal('topFont', 'Noto Sans SC'),
+                size: getVal('topSize', 32) * scale,
+                spacing: getVal('topSpacing', 0.7),
+                radius: (getVal('topRadius', 84) / 100) * ((size / 2) - 20)
             },
             bottom: {
-                text: this.val('bottomText'),
-                font: this.val('bottomFont'),
-                size: this.val('bottomSize') * scale,
-                spacing: this.val('bottomSpacing'),
-                radius: (this.val('bottomRadius') / 100) * ((size / 2) - 20)
+                text: getStringVal('bottomText', ''),
+                font: getStringVal('bottomFont', 'Noto Sans SC'),
+                size: getVal('bottomSize', 28) * scale,
+                spacing: getVal('bottomSpacing', 0.6),
+                radius: (getVal('bottomRadius', 82) / 100) * ((size / 2) - 20)
             },
-            starSize: this.val('starSize') * scale,
-            agingTexture: this.val('agingTexture'),
-            agingIntensity: this.val('agingIntensity') / 100,
-            agingScale: this.val('agingScale'),
-            vignetteIntensity: this.val('vignetteIntensity') / 100
+            starSize: getVal('starSize', 80) * scale,
+            agingTexture: getStringVal('agingTexture', 'paper'),
+            agingIntensity: getVal('agingIntensity', 40) / 100,
+            agingScale: getVal('agingScale', 110)
         };
     }
 
@@ -794,37 +801,6 @@ class StampGenerator {
         const maskCtx = originalMask.getContext('2d');
         maskCtx.drawImage(ctx.canvas, 0, 0);
 
-        const wearIntensity = opt.wearLevel;
-
-        if (opt.paperTextureVisibility > 0) {
-            this.applyTextureToStampOnly(ctx, (textureCtx) => {
-                const paper = this.getPaperTexture(opt.size, opt.size, opt.textureBaseSize, opt.textureBaseSize);
-                textureCtx.save();
-                textureCtx.globalAlpha = opt.paperTextureVisibility * 0.6;
-                textureCtx.globalCompositeOperation = 'overlay';
-                textureCtx.drawImage(paper, 0, 0);
-                textureCtx.restore();
-            });
-        }
-
-        if (wearIntensity > 0) {
-            const wearMap = this.getWearMap(opt.size, opt.size, wearIntensity, opt.textureBaseSize, opt.textureBaseSize);
-            this.applyTextureMask(ctx, wearMap, wearIntensity * 0.8);
-
-            const noiseIntensity = Math.min(0.45, wearIntensity + opt.inkVariation);
-            if (noiseIntensity > 0.05) {
-                const noiseCanvas = this.getHighFreqNoise(opt.size, opt.size, noiseIntensity, opt.textureBaseSize, opt.textureBaseSize);
-                ctx.save();
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.globalAlpha = 0.2 + (noiseIntensity * 0.5);
-                ctx.drawImage(noiseCanvas, 0, 0);
-                ctx.restore();
-            }
-
-            const grungeMask = this.getGrungeMask(opt.size, opt.size, wearIntensity, opt.textureBaseSize, opt.textureBaseSize);
-            this.applyTextureMask(ctx, grungeMask, wearIntensity * 0.6);
-        }
-
         if (opt.agingIntensity > 0) {
             const agingTexture = this.getAgingTexture(opt.agingTexture, size, size, opt.agingScale, opt.textureBaseSize, opt.textureBaseSize);
 
@@ -852,12 +828,6 @@ class StampGenerator {
             }
 
             ctx.putImageData(stampImageData, 0, 0);
-        }
-
-        if (opt.vignetteIntensity > 0) {
-            this.applyTextureToStampOnly(ctx, (textureCtx) => {
-                this.applyVignette(textureCtx, opt.vignetteIntensity);
-            });
         }
 
         if (opt.wobbleLevel > 0.1) {
@@ -1153,8 +1123,8 @@ class StampGenerator {
         this.textures.grungeMask = null;
         this.textures.agingTexture = null;
 
-        // ВАЖНО: передаём baseSize для генерации текстур
-        this.renderToContext(exportCtx, exportSize, resolution, baseSize);
+        // Рендерим в высоком разрешении
+        this.renderToContext(exportCtx, exportSize, resolution);
 
         // Сбрасываем кэш и обновляем превью
         this.textures.noiseMap = null;
